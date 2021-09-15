@@ -7,7 +7,7 @@
       img="git.png"
     />
     <CardLink
-      to="https://github.com/aalleexx-Growdever/challenge-full-stack-web-back"
+      to="https://github.com/aalleexx-Growdever/challenge-front"
       title="App gerenciamento"
       :text="frontend()"
       img="git.png"

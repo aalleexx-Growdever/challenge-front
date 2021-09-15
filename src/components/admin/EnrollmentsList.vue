@@ -243,8 +243,8 @@ export default {
 
     deleteUser() {
       if (this.areLoggedIn()) {
-        const { name } = this.selected[0];
-        this.deletingName = name;
+        const { course } = this.selected[0];
+        this.deletingName = course;
         this.dialogDelete = true;
       } else {
         this.login = true;
