@@ -1,9 +1,14 @@
+import { ValidationProvider } from 'vee-validate/dist/vee-validate.full.esm';
+import { ValidationObserver } from 'vee-validate';
 import Vue from 'vue';
-import 'axios';
 import App from './App.vue';
 import router from './router';
 import store from './store';
 import vuetify from './plugins/vuetify';
+import './plugins/axios';
+
+Vue.component('ValidationProvider', ValidationProvider);
+Vue.component('ValidationObserver', ValidationObserver);
 
 Vue.config.productionTip = false;
 

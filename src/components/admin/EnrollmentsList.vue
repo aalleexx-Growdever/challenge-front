@@ -12,28 +12,28 @@
     <v-container v-if="!loading && !form && !login">
       <template>
         <v-data-table dark v-model="selected" single-select show-select :headers="headers"
-          :items="users" item-key="id">
+          :items="enrollments" item-key="id">
           <template v-slot:top>
             <v-toolbar>
-            <v-toolbar-title>Usuários</v-toolbar-title>
+            <v-toolbar-title>Matrículas</v-toolbar-title>
             <v-divider class="mx-4" inset vertical></v-divider>
             <v-spacer></v-spacer>
             <template>
               <v-btn color="success" dark class="ml-1"  @click="newUser" :disabled="isSelected">
-                <span class="mdi mdi-account-plus" style="font-size: 1.5rem;" />
+                <span class="mdi mdi-file-plus" style="font-size: 1.5rem;" />
               </v-btn>
               <v-btn color="primary" dark class="ml-1"  @click="editUser" :disabled="!isSelected">
-                <span class="mdi mdi-account-edit" style="font-size: 1.5rem;" />
+                <span class="mdi mdi-file-edit" style="font-size: 1.5rem;" />
               </v-btn>
               <v-btn color="error" dark class="ml-1"  @click="deleteUser" :disabled="!isSelected">
-                <span class="mdi mdi-delete" style="font-size: 1.5rem;" />
+                <span class="mdi mdi-file-excel" style="font-size: 1.5rem;" />
               </v-btn>
             </template>
 
             <v-dialog v-model="dialogDelete" max-width="300px" persistent>
               <v-card>
                 <v-card-title class="text-h6">
-                  Tem a certeza de que quer apagar o usuário?
+                  Tem a certeza de que quer apagar a matrícula?
                 </v-card-title>
                 <v-card-text class="text-h6">
                   {{deletingName}}
@@ -74,34 +74,18 @@
       <span class="text-h5">{{ formTitle }}</span>
       <ValidationObserver ref="form" v-slot="{ handleSubmit }">
         <form @submit.prevent="handleSubmit(onSubmit)">
-          <ValidationProvider v-slot="{ errors }" name="Name"
-            rules="required|alpha_spaces" ref="form" >
-            <v-text-field v-model="userForm.name" :error-messages="errors"
-              label="Nome" required></v-text-field>
-            </ValidationProvider>
-            <ValidationProvider v-slot="{ errors }" name="Email"
-              rules="required|email" ref="form" >
-              <v-text-field v-model="userForm.email" :error-messages="errors"
-                label="Email" required></v-text-field>
+            <ValidationProvider v-slot="{ errors }" name="Course"
+              rules="required" ref="form" >
+              <v-select :items="courses" v-model="enrollmentForm.course"
+                label="Curso" outlined :error-messages="errors"
+                data-vv-name="select">
+              </v-select>
             </ValidationProvider>
             <ValidationProvider v-slot="{ errors }" name="CPF"
               :rules="{required: true , regex: /^(([0-9]){3}\.){2}([0-9]){3}-([0-9]){2}$/}"
               ref="form" >
-              <v-text-field v-model="userForm.cpf" :error-messages="errors"
-                label="CPF" required></v-text-field>
-            </ValidationProvider>
-            <ValidationProvider v-slot="{ errors }" name="Role"
-              rules="required" ref="form" >
-              <v-select :items="roles" v-model="userForm.role"
-                label="Função" outlined :error-messages="errors"
-                data-vv-name="select">
-              </v-select>
-            </ValidationProvider>
-            <ValidationProvider v-if="!editing" v-slot="{ errors }" name="Password"
-              rules="required" ref="form" >
-              <v-text-field type="password" v-model="userForm.password" label="Senha"
-                :error-messages="errors">
-              </v-text-field>
+              <v-text-field :readonly="editing" v-model="enrollmentForm.student_cpf"
+              :error-messages="errors" label="CPF do aluno" required></v-text-field>
             </ValidationProvider>
           </form>
           <v-spacer></v-spacer>
@@ -162,7 +146,7 @@
 import { mapActions } from 'vuex';
 
 export default {
-  name: 'UsersList',
+  name: 'EnrollmentsList',
   data() {
     return {
       loading: true,
@@ -185,24 +169,16 @@ export default {
       deletingName: '',
       headers: [
         { text: 'ID', value: 'id', align: 'start' },
-        { text: 'NOME', value: 'name' },
-        { text: 'EMAIL', value: 'email' },
-        { text: 'CPF', value: 'cpf' },
-        { text: 'FUNÇÃO', value: 'role' },
+        { text: 'CURSO', value: 'course' },
+        { text: 'CPF', value: 'student_cpf' },
       ],
-      userForm: {
-        name: '',
-        email: '',
-        cpf: '',
-        role: '',
-        password: '',
+      enrollmentForm: {
+        course: '',
+        student_cpf: '',
       },
-      defaultUserForm: {
-        name: '',
-        email: '',
-        cpf: '',
-        role: '',
-        password: '',
+      defaultEnrollmentForm: {
+        course: '',
+        student_cpf: '',
       },
       loginForm: {
         email: '',
@@ -217,26 +193,26 @@ export default {
 
   computed: {
     formTitle() {
-      return this.editing === false ? 'Cadastrar Usuário' : 'Editar Usuário';
+      return this.editing === false ? 'Cadastrar Matrícula' : 'Editar Matrícula';
     },
     isSelected() {
       return this.selected.length !== 0;
     },
-    users() {
-      return this.$store.getters.getUsers;
+    courses() {
+      return this.$store.getters.getCoursesToList;
     },
-    roles() {
-      return this.$store.getters.getRoles;
+    enrollments() {
+      return this.$store.getters.getEnrollments;
     },
   },
   methods: {
-    ...mapActions(['requestUsers', 'requestRoles']),
+    ...mapActions(['requestCourses', 'requestEnrollments']),
 
     async initialize() {
       try {
         this.loading = true;
-        await this.requestUsers();
-        await this.requestRoles();
+        await this.requestCourses();
+        await this.requestEnrollments();
         this.loading = false;
       } catch {
         this.errorDialog(
@@ -249,7 +225,7 @@ export default {
       if (this.areLoggedIn()) {
         this.editing = false;
         this.form = true;
-        this.userForm = { ...this.defaultUserForm };
+        this.enrollmentForm = { ...this.defaultEnrollmentForm };
       } else {
         this.login = true;
       }
@@ -259,7 +235,7 @@ export default {
       if (this.areLoggedIn()) {
         this.editing = true;
         this.form = true;
-        this.userForm = { ...this.selected[0] };
+        this.enrollmentForm = { ...this.selected[0] };
       } else {
         this.login = true;
       }
@@ -278,7 +254,7 @@ export default {
     async confirmDelete() {
       this.deleteLoading = true;
       const { id } = this.selected[0];
-      await this.$http.delete(`/users/${id}`).then(() => {
+      await this.$http.delete(`/enrollments/${id}`).then(() => {
         this.successDialog(
           'Dados apagados com sucesso!',
         );
@@ -295,7 +271,7 @@ export default {
       this.sendLoading = false;
       this.form = false;
       this.editing = false;
-      this.userForm = { ...this.defaultUserForm };
+      this.enrollmentForm = { ...this.defaultEnrollmentForm };
       this.$refs.form.reset();
     },
 
@@ -311,7 +287,7 @@ export default {
         const { id } = this.selected[0];
         await this.$refs.form.validate().then((success) => {
           if (success === true) {
-            this.$http.put(`/users/${id}`, this.userForm)
+            this.$http.put(`/enrollments/${id}`, this.enrollmentForm)
               .then(() => {
                 this.successDialog(
                   'Dados editados com sucesso!',
@@ -331,7 +307,9 @@ export default {
         this.sendLoading = true;
         await this.$refs.form.validate().then((success) => {
           if (success === true) {
-            this.$http.post('/users', this.userForm)
+            console.log(this.editing);
+            console.log(this.enrollmentForm);
+            this.$http.post('/enrollments', this.enrollmentForm)
               .then(() => {
                 this.successDialog(
                   'Dados cadastrados com sucesso!',
@@ -380,7 +358,7 @@ export default {
     },
 
     areLoggedIn() {
-      if (!this.userName || this.userRole !== 'Manager') {
+      if (!this.userName || (this.userRole !== 'Manager' && this.userRole !== 'Admin')) {
         return false;
       }
       return true;
