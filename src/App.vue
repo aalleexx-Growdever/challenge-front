@@ -76,7 +76,7 @@
                   <v-list-item-title>Sobre</v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
-      </v-list>
+        </v-list>
     </v-navigation-drawer>
 
     <v-app-bar app dark absolute>

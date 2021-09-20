@@ -6,15 +6,21 @@
     "email": "alexbeckercurso@gmail.com",
     "url": "https://www.linkedin.com/in/alexsandro-becker-b627a3186/"
   },
+  "license": "MIT",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "postinstall": "npm run build",
+    "start": "node server.js",
+    "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm run dev"
   },
   "dependencies": {
     "@mdi/font": "^6.1.95",
     "axios": "^0.21.4",
     "core-js": "^3.6.5",
+    "express": "^4.17.1",
+    "serve-static": "^1.14.1",
     "vee-validate": "^3.4.12",
     "vue": "^2.6.11",
     "vue-axios": "^3.3.4",
